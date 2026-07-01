@@ -1,552 +1,66 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEON STUDIO 3D｜未来创意网页</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-      min-height: 100vh;
-      background: #060713;
-      color: #fff;
-      overflow-x: hidden;
-      perspective: 1200px;
-    }
-
-    .bg {
-      position: fixed;
-      inset: 0;
-      z-index: -3;
-      background:
-        radial-gradient(circle at 18% 15%, rgba(0, 229, 255, .42), transparent 28%),
-        radial-gradient(circle at 78% 22%, rgba(255, 75, 180, .32), transparent 30%),
-        radial-gradient(circle at 50% 86%, rgba(120, 90, 255, .36), transparent 36%),
-        #060713;
-    }
-
-    .stars {
-      position: fixed;
-      inset: 0;
-      z-index: -2;
-      background-image:
-        radial-gradient(circle, rgba(255,255,255,.55) 1px, transparent 1px),
-        radial-gradient(circle, rgba(0,229,255,.6) 1px, transparent 1px);
-      background-size: 54px 54px, 107px 107px;
-      animation: drift 22s linear infinite;
-      opacity: .45;
-    }
-
-    .grid {
-      position: fixed;
-      inset: auto 0 0 0;
-      height: 55vh;
-      z-index: -1;
-      background-image:
-        linear-gradient(rgba(0,229,255,.18) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,.18) 1px, transparent 1px);
-      background-size: 64px 64px;
-      transform: rotateX(62deg) translateY(80px);
-      transform-origin: bottom;
-      mask-image: linear-gradient(to top, rgba(0,0,0,.9), transparent);
-    }
-
-    header {
-      width: min(1180px, calc(100% - 40px));
-      margin: 0 auto;
-      padding: 28px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      z-index: 5;
-    }
-
-    .logo {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 2px;
-    }
-
-    .logo span { color: #00e5ff; text-shadow: 0 0 18px #00e5ff; }
-
-    nav { display: flex; gap: 28px; font-size: 14px; color: rgba(255,255,255,.72); }
-    nav a { color: inherit; text-decoration: none; transition: .25s; }
-    nav a:hover { color: #00e5ff; }
-
-    .hero {
-      width: min(1180px, calc(100% - 40px));
-      margin: 70px auto 0;
-      min-height: 640px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
-      position: relative;
-      z-index: 2;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 15px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.07);
-      backdrop-filter: blur(14px);
-      color: rgba(255,255,255,.78);
-      font-size: 13px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #00e5ff;
-      box-shadow: 0 0 18px #00e5ff;
-    }
-
-    h1 {
-      margin-top: 26px;
-      font-size: clamp(48px, 8vw, 94px);
-      line-height: .95;
-      letter-spacing: -4px;
-    }
-
-    h1 em {
-      font-style: normal;
-      background: linear-gradient(90deg, #fff, #00e5ff, #ff5bbd);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .desc {
-      margin-top: 28px;
-      width: min(560px, 100%);
-      line-height: 1.85;
-      color: rgba(255,255,255,.68);
-      font-size: 17px;
-    }
-
-    .btns {
-      margin-top: 36px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      cursor: pointer;
-      padding: 14px 22px;
-      border-radius: 16px;
-      font-weight: 900;
-      color: #061018;
-      background: linear-gradient(135deg, #00e5ff, #9bfff7);
-      box-shadow: 0 18px 45px rgba(0,229,255,.26);
-      transition: .25s;
-    }
-
-    .btn.secondary {
-      color: #fff;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: none;
-    }
-
-    .btn:hover { transform: translateY(-5px) scale(1.03); }
-
-    .stage {
-      height: 540px;
-      position: relative;
-      transform-style: preserve-3d;
-    }
-
-    .glass-3d {
-      position: absolute;
-      inset: 20px;
-      border-radius: 38px;
-      background: linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 40px 90px rgba(0,0,0,.42), inset 0 0 80px rgba(255,255,255,.05);
-      transform-style: preserve-3d;
-      transition: transform .12s ease-out;
-      overflow: hidden;
-    }
-
-    .glass-3d::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background: conic-gradient(from 120deg, transparent, rgba(0,229,255,.25), transparent, rgba(255,91,189,.22), transparent);
-      animation: rotateFlat 8s linear infinite;
-    }
-
-    .glass-inner {
-      position: absolute;
-      inset: 1px;
-      border-radius: 38px;
-      background: rgba(6,7,19,.54);
-      overflow: hidden;
-    }
-
-    .cube {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      left: 50%;
-      top: 48%;
-      transform-style: preserve-3d;
-      transform: translate(-50%, -50%) rotateX(-18deg) rotateY(30deg);
-      animation: cubeSpin 9s linear infinite;
-    }
-
-    .face {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,.2);
-      background: linear-gradient(135deg, rgba(0,229,255,.34), rgba(255,91,189,.18));
-      box-shadow: inset 0 0 40px rgba(255,255,255,.08), 0 0 34px rgba(0,229,255,.16);
-      font-weight: 900;
-      color: rgba(255,255,255,.86);
-      letter-spacing: 1px;
-    }
-
-    .front { transform: translateZ(75px); }
-    .back { transform: rotateY(180deg) translateZ(75px); }
-    .right { transform: rotateY(90deg) translateZ(75px); }
-    .left { transform: rotateY(-90deg) translateZ(75px); }
-    .top { transform: rotateX(90deg) translateZ(75px); }
-    .bottom { transform: rotateX(-90deg) translateZ(75px); }
-
-    .sphere {
-      position: absolute;
-      width: 260px;
-      height: 260px;
-      right: 24px;
-      top: 40px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 32% 28%, #fff, #80ffff 10%, #00e5ff 28%, #5c55ff 56%, rgba(92,85,255,.08) 72%);
-      filter: drop-shadow(0 0 55px rgba(0,229,255,.6));
-      transform: translateZ(80px);
-      animation: float 5s ease-in-out infinite;
-    }
-
-    .mini {
-      position: absolute;
-      padding: 15px 17px;
-      border-radius: 20px;
-      background: rgba(0,0,0,.38);
-      border: 1px solid rgba(255,255,255,.15);
-      backdrop-filter: blur(14px);
-      transform: translateZ(120px);
-    }
-
-    .mini strong { display: block; font-size: 25px; margin-bottom: 4px; }
-    .mini span { font-size: 13px; color: rgba(255,255,255,.58); }
-
-    .m1 { left: 36px; top: 44px; }
-    .m2 { right: 32px; bottom: 42px; }
-    .m3 { left: 44px; bottom: 58px; }
-
-    section {
-      width: min(1180px, calc(100% - 40px));
-      margin: 90px auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    .section-title {
-      font-size: 38px;
-      letter-spacing: -1px;
-      margin-bottom: 24px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
-      perspective: 1000px;
-    }
-
-    .card {
-      min-height: 220px;
-      padding: 28px;
-      border-radius: 28px;
-      background: rgba(255,255,255,.075);
-      border: 1px solid rgba(255,255,255,.13);
-      transform-style: preserve-3d;
-      transition: .25s;
-      box-shadow: 0 25px 60px rgba(0,0,0,.18);
-    }
-
-    .card:hover {
-      transform: rotateX(7deg) rotateY(-8deg) translateY(-10px);
-      background: rgba(255,255,255,.11);
-    }
-
-    .icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, rgba(0,229,255,.9), rgba(255,91,189,.9));
-      margin-bottom: 24px;
-      font-size: 21px;
-      font-weight: 900;
-      transform: translateZ(34px);
-    }
-
-    .card h3 {
-      font-size: 22px;
-      margin-bottom: 12px;
-      transform: translateZ(28px);
-    }
-
-    .card p {
-      color: rgba(255,255,255,.62);
-      line-height: 1.75;
-      transform: translateZ(22px);
-    }
-
-    .showcase {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-
-    .panel {
-      min-height: 310px;
-      border-radius: 34px;
-      padding: 34px;
-      background:
-        linear-gradient(145deg, rgba(0,229,255,.18), rgba(255,91,189,.08)),
-        rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
-      position: relative;
-      overflow: hidden;
-      transform-style: preserve-3d;
-      transition: .25s;
-    }
-
-    .panel:hover { transform: translateY(-8px) rotateX(4deg); }
-
-    .panel::after {
-      content: "";
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      right: -70px;
-      bottom: -70px;
-      border-radius: 50%;
-      background: rgba(0,229,255,.2);
-      filter: blur(10px);
-    }
-
-    .panel h3 {
-      font-size: 30px;
-      margin-bottom: 16px;
-      position: relative;
-      z-index: 1;
-      transform: translateZ(32px);
-    }
-
-    .panel p {
-      color: rgba(255,255,255,.66);
-      line-height: 1.8;
-      position: relative;
-      z-index: 1;
-      transform: translateZ(24px);
-    }
-
-    .email-link {
-      color: rgba(255,255,255,.72);
-      text-decoration: none;
-      transition: .25s;
-    }
-
-    .email-link:hover {
-      color: #00e5ff;
-      text-shadow: 0 0 16px rgba(0,229,255,.8);
-    }
-
-    footer {
-      width: min(1180px, calc(100% - 40px));
-      margin: 100px auto 40px;
-      padding: 26px 0;
-      border-top: 1px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.5);
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 2;
-    }
-
-    @keyframes drift {
-      to { background-position: 540px 540px, -420px 380px; }
-    }
-
-    @keyframes rotateFlat {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes cubeSpin {
-      to { transform: translate(-50%, -50%) rotateX(342deg) rotateY(390deg); }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateZ(80px) translateY(0); }
-      50% { transform: translateZ(80px) translateY(-22px); }
-    }
-
-    @media (max-width: 860px) {
-      nav { display: none; }
-      .hero { grid-template-columns: 1fr; margin-top: 40px; }
-      .stage { height: 480px; }
-      .sphere { width: 210px; height: 210px; }
-      .cards, .showcase { grid-template-columns: 1fr; }
-      h1 { letter-spacing: -2px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xneo下载页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #121212;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        h1 {
+            color: #fff;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            width: 320px;
+            height: 60px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn1 {
+            background: #2563eb;
+            color: white;
+        }
+        .btn1:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        .btn2 {
+            background: #10b981;
+            color: white;
+        }
+        .btn2:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-  <div class="bg"></div>
-  <div class="stars"></div>
-  <div class="grid"></div>
-
-  <header>
-    <div class="logo">NEON<span>STUDIO</span></div>
-    <nav>
-      <a href="#service">服务</a>
-      <a href="#work">作品</a>
-      <a href="#about">理念</a>
-      <a href="#contact">联系</a>
-    </nav>
-  </header>
-
-  <main class="hero">
-    <div>
-      <div class="tag"><span class="dot"></span> 3D Creative Web Experience</div>
-      <h1>让网页拥有<br><em>空间感</em>与未来感</h1>
-      <p class="desc">
-        这是一个带 3D 视觉效果的创意单页网页。鼠标移动时，右侧主视觉会产生空间倾斜；
-        页面中加入旋转立方体、悬浮球体、景深网格和玻璃拟态卡片，适合科技品牌、个人作品集和产品发布页。
-      </p>
-      <div class="btns">
-        <button class="btn" onclick="document.querySelector('#work').scrollIntoView({behavior:'smooth'})">查看 3D 展示</button>
-        <button class="btn secondary" onclick="window.location.href='mailto:ajfdlsjdjskdkfj@163.com'">联系合作</button>
-      </div>
-    </div>
-
-    <div class="stage">
-      <div class="glass-3d" id="tiltCard">
-        <div class="glass-inner">
-          <div class="sphere"></div>
-          <div class="cube">
-            <div class="face front">3D</div>
-            <div class="face back">WEB</div>
-            <div class="face right">UI</div>
-            <div class="face left">UX</div>
-            <div class="face top">AI</div>
-            <div class="face bottom">GO</div>
-          </div>
-          <div class="mini m1"><strong>3D</strong><span>空间视觉</span></div>
-          <div class="mini m2"><strong>CSS</strong><span>纯前端动效</span></div>
-          <div class="mini m3"><strong>∞</strong><span>未来想象</span></div>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <section id="service">
-    <h2 class="section-title">3D 网页能做什么</h2>
-    <div class="cards">
-      <div class="card">
-        <div class="icon">✦</div>
-        <h3>高级首屏</h3>
-        <p>用 3D 主视觉和强动效快速抓住用户注意力，适合官网、活动页和发布页。</p>
-      </div>
-      <div class="card">
-        <div class="icon">◈</div>
-        <h3>作品集展示</h3>
-        <p>让个人项目不再只是平面排列，而是拥有层次、空间和更强记忆点。</p>
-      </div>
-      <div class="card">
-        <div class="icon">◎</div>
-        <h3>产品视觉包装</h3>
-        <p>适合科技产品、AI 工具、数字服务，用未来感增强专业形象。</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="work">
-    <h2 class="section-title">精选展示</h2>
-    <div class="showcase">
-      <div class="panel">
-        <h3>3D Launch Page</h3>
-        <p>产品发布页可以使用旋转模型、悬浮卡片和渐变光效，让用户第一眼感受到产品的科技属性。</p>
-      </div>
-      <div class="panel">
-        <h3>Interactive Portfolio</h3>
-        <p>作品集可以通过卡片倾斜、层级阴影和动效反馈，让浏览体验更像进入一个数字展厅。</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="about">
-    <h2 class="section-title">设计理念</h2>
-    <div class="cards">
-      <div class="card">
-        <div class="icon">01</div>
-        <h3>空间层次</h3>
-        <p>通过景深、阴影、透视和前后层级，让页面不再扁平。</p>
-      </div>
-      <div class="card">
-        <div class="icon">02</div>
-        <h3>轻量实现</h3>
-        <p>不依赖复杂框架，一个 HTML 文件即可运行，方便继续修改。</p>
-      </div>
-      <div class="card">
-        <div class="icon">03</div>
-        <h3>移动端适配</h3>
-        <p>电脑和手机都能正常展示，布局会根据屏幕自动调整。</p>
-      </div>
-    </div>
-  </section>
-
-  <footer id="contact">
-    <div>© 2026 NEON STUDIO 3D. Designed with imagination.</div>
-    <div><a class="email-link" href="/cdn-cgi/l/email-protection#8eefe4e8eae2fde4eae4fde5eae5e8e4cebfb8bda0ede1e3"><span class="__cf_email__" data-cfemail="85e4efe3e1e9f6efe1eff6eee1eee3efc5b4b3b6abe6eae8">[email&#160;protected]</span></a></div>
-  </footer>
-
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    const card = document.getElementById("tiltCard");
-
-    window.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - (rect.left + rect.width / 2);
-      const y = e.clientY - (rect.top + rect.height / 2);
-
-      const rotateY = Math.max(-14, Math.min(14, x / 28));
-      const rotateX = Math.max(-14, Math.min(14, -y / 28));
-
-      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    });
-
-    window.addEventListener("mouseleave", () => {
-      card.style.transform = "rotateX(0deg) rotateY(0deg)";
-    });
-  </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+    <h1>xeno 下载</h1>
+    <!-- 按钮1：xeno官网 -->
+    <button class="btn btn1" onclick="window.open('https://xeno.now/Download', '_blank')">
+        xneo官网
+    </button>
+    <!-- 按钮2：xeno最新版本下载 -->
+    <button class="btn btn2" onclick="window.open('https://wwaws.lanzouq.com/iHlN73twwgve', '_blank')">
+        xneo最新版本下载
+    </button>
 </body>
 </html>
